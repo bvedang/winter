@@ -16,6 +16,9 @@
 - `./gradlew run`: runs the example app (`examples/basic`) on `http://127.0.0.1:8080`.
 - `./gradlew :core:test`: runs unit + integration tests for the framework.
 - `./scripts/smoke.sh`: boots the example server and curls key endpoints (routing, CORS, HEAD/OPTIONS, safety checks).
+- `./scripts/watch.sh`: restarts the example app on file changes (requires `watchexec` or `entr`).
+- `./scripts/new-route.sh /users/[id]`: scaffolds a new route under `examples/basic/routes/`.
+- `./scripts/clean-cache.sh`: clears the runtime compilation cache.
 
 ## Coding Style & Naming Conventions
 

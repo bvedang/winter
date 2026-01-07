@@ -20,6 +20,11 @@ Smoke test:
 ./scripts/smoke.sh
 ```
 
+Dev helpers:
+- `./scripts/watch.sh` (requires `watchexec` or `entr`)
+- `./scripts/clean-cache.sh` (clears the route compiler cache)
+- `./scripts/new-route.sh /users/[id]` (scaffolds a new route)
+
 Current status/backlog: `docs/STATUS.md`.
 
 ## Routing Contract (MVP)
