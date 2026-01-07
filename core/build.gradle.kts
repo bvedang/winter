@@ -10,7 +10,7 @@ java {
 
 dependencies {
     implementation("io.undertow:undertow-core:2.3.20.Final")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.20.1")
 
     testImplementation(platform("org.junit:junit-bom:5.10.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
