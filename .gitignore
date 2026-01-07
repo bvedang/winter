@@ -1,0 +1,38 @@
+# Gradle
+.gradle/
+build/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# IDE - IntelliJ
+.idea/
+*.iml
+out/
+
+# IDE - Eclipse
+.classpath
+.project
+.settings/
+
+# IDE - VS Code
+.vscode/
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Java
+*.class
+hs_err_pid*
+replay_pid*
+
+# JVM / profiling
+*.hprof
+*.jfr
+
+# Logs
+*.log
