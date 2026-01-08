@@ -1,8 +1,9 @@
 package winter.example.basic;
 
-import java.nio.file.Path;
 import winter.Winter;
 import winter.WinterConfig;
+
+import java.nio.file.Path;
 
 public final class Main {
 

@@ -15,14 +15,14 @@ spotless {
     java {
         target("**/*.java")
         targetExclude("build/**")
-        googleJavaFormat("1.21.0").aosp()
+        googleJavaFormat("1.33.0").aosp().reorderImports(true)
         trimTrailingWhitespace()
         endWithNewline()
     }
     kotlinGradle {
         target("**/*.kts")
         targetExclude("build/**")
-        ktlint()
+        ktlint("0.50.0")
     }
 }
 
