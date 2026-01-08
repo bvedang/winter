@@ -27,6 +27,12 @@ public final class RouteCompiler {
 
     public RouteCompiler() {}
 
+    public void invalidate(Path routeFile) {
+        if (routeFile == null) return;
+        var existing = cache.remove(routeFile);
+        if (existing != null) closeQuietly(existing.handle);
+    }
+
     public RouteHandle load(Path routeFile) {
         long lastModified;
         try {

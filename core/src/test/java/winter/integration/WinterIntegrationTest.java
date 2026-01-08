@@ -12,6 +12,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.time.Duration;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -283,6 +284,57 @@ final class WinterIntegrationTest {
         }
     }
 
+    @Test
+    void hotReloadUpdatesChangedRoute(@TempDir Path tempDir) throws Exception {
+        Path routes = tempDir.resolve("routes");
+        Files.createDirectories(routes);
+        Path index = routes.resolve("index.java");
+
+        writeRoute(
+            index,
+            """
+            import winter.Ctx;
+            import java.util.Map;
+            public class Route {
+              public Object get(Ctx ctx) { return Map.of("msg", "v1"); }
+            }
+            """
+        );
+
+        try (var running = start(routes, config -> config.withHotReload(true))) {
+            assertEquals("v1", JSON.readValue(get(running, "/"), Map.class).get("msg"));
+
+            writeRoute(
+                index,
+                """
+                import winter.Ctx;
+                import java.util.Map;
+                public class Route {
+                  public Object get(Ctx ctx) { return Map.of("msg", "v2"); }
+                }
+                """
+            );
+            Files.setLastModifiedTime(
+                index,
+                FileTime.fromMillis(System.currentTimeMillis() + 2000)
+            );
+
+            boolean updated = false;
+            for (int i = 0; i < 50; i++) {
+                String msg = (String) JSON
+                    .readValue(get(running, "/"), Map.class)
+                    .get("msg");
+                if ("v2".equals(msg)) {
+                    updated = true;
+                    break;
+                }
+                Thread.sleep(100);
+            }
+
+            assertTrue(updated, "Expected hot reload to serve updated route code");
+        }
+    }
+
     private static void writeRoute(Path file, String javaSource)
         throws Exception {
         Files.createDirectories(file.getParent());
@@ -336,5 +388,18 @@ final class WinterIntegrationTest {
         public void close() {
             server.close();
         }
+    }
+
+    private static String get(Running running, String path) throws Exception {
+        var response = running.client.send(
+            HttpRequest.newBuilder(running.base.resolve(path)).GET().build(),
+            BodyHandlers.ofString()
+        );
+        assertEquals(
+            200,
+            response.statusCode(),
+            "Unexpected status for GET " + path + ": " + response.body()
+        );
+        return response.body();
     }
 }

@@ -66,3 +66,4 @@ Middleware hooks (`winter.middleware.Middleware`):
 
 - `WinterConfig.DEFAULT_MAX_BODY_BYTES` is enforced for request bodies (413 on overflow)
 - Set `WinterConfig.withExposeErrors(true)` to include exception messages in 500s (default: false)
+- Set `WinterConfig.withHotReload(true)` to watch `routes/` and recompile on change (default: false)
