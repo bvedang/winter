@@ -1,10 +1,21 @@
 package winter.integration;
 
-import static java.net.http.HttpRequest.BodyPublishers;
-import static java.net.http.HttpResponse.BodyHandlers;
 import static org.junit.jupiter.api.Assertions.*;
 
+import static java.net.http.HttpRequest.BodyPublishers;
+import static java.net.http.HttpResponse.BodyHandlers;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import winter.Res;
+import winter.Winter;
+import winter.WinterConfig;
+import winter.WinterServer;
+import winter.middleware.Middleware;
+
 import java.net.ServerSocket;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -14,13 +25,6 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Duration;
 import java.util.Map;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import winter.Res;
-import winter.Winter;
-import winter.WinterConfig;
-import winter.WinterServer;
-import winter.middleware.Middleware;
 
 final class WinterIntegrationTest {
 

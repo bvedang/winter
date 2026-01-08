@@ -1,5 +1,7 @@
 package winter.reload;
 
+import winter.compiler.RouteCompiler;
+
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
@@ -14,7 +16,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import winter.compiler.RouteCompiler;
 
 public final class RouteWatcher implements AutoCloseable {
 
