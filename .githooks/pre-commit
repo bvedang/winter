@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+
+./gradlew spotlessApply --quiet
+
+# Re-stage any files that were formatted
+git add -u

@@ -16,7 +16,8 @@ public final class WinterServer implements AutoCloseable {
     public void close() {
         try {
             if (routeWatcher != null) routeWatcher.close();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         server.stop();
     }
 }

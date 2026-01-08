@@ -16,6 +16,8 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: gradle
+      - name: Check formatting
+        run: ./gradlew spotlessCheck --no-daemon
       - name: Tests
         run: ./gradlew :core:test --no-daemon
       - name: Smoke

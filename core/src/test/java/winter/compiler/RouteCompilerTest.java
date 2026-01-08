@@ -13,14 +13,13 @@ final class RouteCompilerTest {
     void invalidateForcesReload(@TempDir Path tempDir) throws Exception {
         Path route = tempDir.resolve("index.java");
         Files.writeString(
-            route,
-            """
+                route,
+                """
             import winter.Ctx;
             public class Route {
               public Object get(Ctx ctx) { return "v1"; }
             }
-            """
-        );
+            """);
 
         var compiler = new RouteCompiler();
         RouteHandle first = compiler.load(route);

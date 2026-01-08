@@ -39,16 +39,14 @@ public final class Winter {
         return start(config, new Middleware[0]);
     }
 
-    public static WinterServer start(
-        WinterConfig config,
-        Middleware... middlewares
-    ) {
+    public static WinterServer start(WinterConfig config, Middleware... middlewares) {
         var winter = new Winter(config, Arrays.asList(middlewares));
 
-        Undertow server = Undertow.builder()
-            .addHttpListener(config.port(), config.host())
-            .setHandler(new BlockingHandler(winter.handler()))
-            .build();
+        Undertow server =
+                Undertow.builder()
+                        .addHttpListener(config.port(), config.host())
+                        .setHandler(new BlockingHandler(winter.handler()))
+                        .build();
         server.start();
 
         AutoCloseable watcher = null;
@@ -62,14 +60,8 @@ public final class Winter {
     private HttpHandler handler() {
         return exchange -> {
             RouteMatch match = router.match(exchange.getRequestPath());
-            var params =
-                match == null ? Map.<String, String>of() : match.params();
-            var ctx = new Ctx(
-                exchange,
-                params,
-                objectMapper,
-                config.maxBodyBytes()
-            );
+            var params = match == null ? Map.<String, String>of() : match.params();
+            var ctx = new Ctx(exchange, params, objectMapper, config.maxBodyBytes());
 
             Object result = execute(ctx, () -> dispatch(match, exchange, ctx));
             writeResult(exchange, result);
@@ -81,11 +73,8 @@ public final class Winter {
         Object handle() throws Exception;
     }
 
-    private Object dispatch(
-        RouteMatch match,
-        HttpServerExchange exchange,
-        Ctx ctx
-    ) throws Exception {
+    private Object dispatch(RouteMatch match, HttpServerExchange exchange, Ctx ctx)
+            throws Exception {
         if (match == null) {
             return Res.of(404, Map.of("error", "Not Found"));
         }
@@ -95,10 +84,7 @@ public final class Winter {
         var verb = method.toLowerCase();
 
         if ("OPTIONS".equals(method)) {
-            return Res.of(204, null).header(
-                "Allow",
-                allowHeader(handle.allowedMethods())
-            );
+            return Res.of(204, null).header("Allow", allowHeader(handle.allowedMethods()));
         }
 
         if ("HEAD".equals(method)) {
@@ -108,10 +94,8 @@ public final class Winter {
                 try {
                     return handle.invoke("get", ctx);
                 } catch (NoSuchMethodException exception) {
-                    return Res.of(
-                        405,
-                        Map.of("error", "Method Not Allowed")
-                    ).header("Allow", allowHeader(handle.allowedMethods()));
+                    return Res.of(405, Map.of("error", "Method Not Allowed"))
+                            .header("Allow", allowHeader(handle.allowedMethods()));
                 }
             }
         }
@@ -119,10 +103,8 @@ public final class Winter {
         try {
             return handle.invoke(verb, ctx);
         } catch (NoSuchMethodException exception) {
-            return Res.of(405, Map.of("error", "Method Not Allowed")).header(
-                "Allow",
-                allowHeader(handle.allowedMethods())
-            );
+            return Res.of(405, Map.of("error", "Method Not Allowed"))
+                    .header("Allow", allowHeader(handle.allowedMethods()));
         }
     }
 
@@ -141,11 +123,7 @@ public final class Winter {
         return String.join(", ", out);
     }
 
-    private static void addIfPresent(
-        List<String> out,
-        Set<String> allowed,
-        String method
-    ) {
+    private static void addIfPresent(List<String> out, Set<String> allowed, String method) {
         if (allowed.contains(method)) out.add(method);
     }
 
@@ -197,22 +175,17 @@ public final class Winter {
     }
 
     private Object defaultError(Ctx ctx, Exception exception) {
-        if (exception instanceof HttpError error) return Res.of(
-            error.status(),
-            error.body()
-        );
+        if (exception instanceof HttpError error) return Res.of(error.status(), error.body());
 
         exception.printStackTrace(System.err);
         if (config.exposeErrors()) {
             return Res.of(
-                500,
-                Map.of(
-                    "error",
-                    "Internal Server Error",
-                    "message",
-                    String.valueOf(exception.getMessage())
-                )
-            );
+                    500,
+                    Map.of(
+                            "error",
+                            "Internal Server Error",
+                            "message",
+                            String.valueOf(exception.getMessage())));
         }
         return Res.of(500, Map.of("error", "Internal Server Error"));
     }
@@ -227,13 +200,11 @@ public final class Winter {
 
         if (result instanceof Res res) {
             exchange.setStatusCode(res.status());
-            res
-                .headers()
-                .forEach((name, value) ->
-                    exchange
-                        .getResponseHeaders()
-                        .put(HttpString.tryFromString(name), value)
-                );
+            res.headers()
+                    .forEach(
+                            (name, value) ->
+                                    exchange.getResponseHeaders()
+                                            .put(HttpString.tryFromString(name), value));
             writeResult(exchange, res.body());
             return;
         }
@@ -242,14 +213,11 @@ public final class Winter {
             if (head) {
                 byte[] bytes = text.getBytes(StandardCharsets.UTF_8);
                 exchange.setResponseContentLength(bytes.length);
-                exchange
-                    .getResponseHeaders()
-                    .put(Headers.CONTENT_TYPE, "text/plain; charset=utf-8");
+                exchange.getResponseHeaders()
+                        .put(Headers.CONTENT_TYPE, "text/plain; charset=utf-8");
                 return;
             }
-            exchange
-                .getResponseHeaders()
-                .put(Headers.CONTENT_TYPE, "text/plain; charset=utf-8");
+            exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain; charset=utf-8");
             exchange.getResponseSender().send(text, StandardCharsets.UTF_8);
             return;
         }
@@ -259,33 +227,21 @@ public final class Winter {
         writeJson(exchange, status, result, !head);
     }
 
-    private void writeJson(
-        HttpServerExchange exchange,
-        int status,
-        Object body,
-        boolean sendBody
-    ) {
+    private void writeJson(HttpServerExchange exchange, int status, Object body, boolean sendBody) {
         exchange.setStatusCode(status);
-        exchange
-            .getResponseHeaders()
-            .put(Headers.CONTENT_TYPE, "application/json; charset=utf-8");
+        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json; charset=utf-8");
         try {
             byte[] bytes = objectMapper.writeValueAsBytes(body);
             exchange.setResponseContentLength(bytes.length);
             if (sendBody) {
-                exchange
-                    .getResponseSender()
-                    .send(new String(bytes, StandardCharsets.UTF_8));
+                exchange.getResponseSender().send(new String(bytes, StandardCharsets.UTF_8));
             }
         } catch (Exception exception) {
             exchange.setStatusCode(500);
-            exchange
-                .getResponseHeaders()
-                .put(Headers.CONTENT_TYPE, "application/json; charset=utf-8");
+            exchange.getResponseHeaders()
+                    .put(Headers.CONTENT_TYPE, "application/json; charset=utf-8");
             if (sendBody) {
-                exchange
-                    .getResponseSender()
-                    .send("{\"error\":\"Internal Server Error\"}");
+                exchange.getResponseSender().send("{\"error\":\"Internal Server Error\"}");
             }
         }
     }

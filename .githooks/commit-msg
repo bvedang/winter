@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# Conventional commit format: type(scope): message
+# Types: feat, fix, docs, style, refactor, test, chore
+commit_regex='^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .{1,}'
+
+if ! grep -qE "$commit_regex" "$1"; then
+    echo "Invalid commit message format."
+    echo ""
+    echo "Expected: type(scope): message"
+    echo "Types: feat, fix, docs, style, refactor, test, chore"
+    echo ""
+    echo "Examples:"
+    echo "  feat(router): add wildcard routes"
+    echo "  fix: resolve null pointer in Ctx"
+    echo "  chore(deps): bump jackson version"
+    exit 1
+fi

@@ -5,6 +5,7 @@ import winter.Res;
 import winter.middleware.Middleware;
 
 public final class CorsMiddleware implements Middleware {
+
     private static final String ALLOW_METHODS = "GET,POST,PUT,PATCH,DELETE,OPTIONS";
     private static final String DEFAULT_ALLOW_HEADERS = "content-type, authorization";
 
@@ -31,9 +32,7 @@ public final class CorsMiddleware implements Middleware {
     private static Res baseCors(Res res, Ctx ctx) {
         // Minimal/default policy for development: allow all origins.
         // If you want stricter behavior, make this check `Origin` and return 403.
-        return res
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Vary", "Origin");
+        return res.header("Access-Control-Allow-Origin", "*").header("Vary", "Origin");
     }
 
     private static String allowHeaders(Ctx ctx) {
@@ -42,4 +41,3 @@ public final class CorsMiddleware implements Middleware {
         return requested;
     }
 }
-
