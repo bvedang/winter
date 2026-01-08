@@ -7,7 +7,8 @@ public record WinterConfig(
     String host,
     int port,
     int maxBodyBytes,
-    boolean exposeErrors
+    boolean exposeErrors,
+    boolean hotReload
 ) {
     public static final int DEFAULT_MAX_BODY_BYTES = 1024 * 1024;
 
@@ -17,6 +18,7 @@ public record WinterConfig(
             "0.0.0.0",
             8080,
             DEFAULT_MAX_BODY_BYTES,
+            false,
             false
         );
     }
@@ -27,7 +29,8 @@ public record WinterConfig(
             host,
             port,
             maxBodyBytes,
-            exposeErrors
+            exposeErrors,
+            hotReload
         );
     }
 
@@ -37,7 +40,8 @@ public record WinterConfig(
             host,
             port,
             maxBodyBytes,
-            exposeErrors
+            exposeErrors,
+            hotReload
         );
     }
 
@@ -47,7 +51,8 @@ public record WinterConfig(
             host,
             port,
             maxBodyBytes,
-            exposeErrors
+            exposeErrors,
+            hotReload
         );
     }
 
@@ -57,7 +62,19 @@ public record WinterConfig(
             host,
             port,
             maxBodyBytes,
-            exposeErrors
+            exposeErrors,
+            hotReload
+        );
+    }
+
+    public WinterConfig withHotReload(boolean hotReload) {
+        return new WinterConfig(
+            routesDir,
+            host,
+            port,
+            maxBodyBytes,
+            exposeErrors,
+            hotReload
         );
     }
 }

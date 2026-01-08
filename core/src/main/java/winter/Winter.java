@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import winter.compiler.RouteCompiler;
 import winter.middleware.Middleware;
+import winter.reload.RouteWatcher;
 import winter.router.FileRouter;
 import winter.router.RouteMatch;
 
@@ -50,7 +51,12 @@ public final class Winter {
             .build();
         server.start();
 
-        return new WinterServer(server);
+        AutoCloseable watcher = null;
+        if (config.hotReload()) {
+            watcher = RouteWatcher.start(config.routesDir(), winter.compiler);
+        }
+
+        return new WinterServer(server, watcher);
     }
 
     private HttpHandler handler() {
