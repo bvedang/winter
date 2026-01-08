@@ -38,119 +38,89 @@ public final class RouteCompiler {
         try {
             lastModified = Files.getLastModifiedTime(routeFile).toMillis();
         } catch (Exception exception) {
-            throw new RuntimeException(
-                "Failed to stat route file: " + routeFile,
-                exception
-            );
+            throw new RuntimeException("Failed to stat route file: " + routeFile, exception);
         }
 
-        return cache.compute(routeFile, (path, existing) -> {
-            if (
-                existing != null && existing.lastModifiedMillis == lastModified
-            ) return existing;
+        return cache.compute(
+                        routeFile,
+                        (path, existing) -> {
+                            if (existing != null && existing.lastModifiedMillis == lastModified)
+                                return existing;
 
-            RouteHandle next = compile(routeFile);
-            if (existing != null) closeQuietly(existing.handle);
-            return new Cached(lastModified, next);
-        }).handle;
+                            RouteHandle next = compile(routeFile);
+                            if (existing != null) closeQuietly(existing.handle);
+                            return new Cached(lastModified, next);
+                        })
+                .handle;
     }
 
     private RouteHandle compile(Path routeFile) {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         if (compiler == null) {
-            throw new RuntimeException(
-                "No Java compiler found. Run with a JDK (not a JRE)."
-            );
+            throw new RuntimeException("No Java compiler found. Run with a JDK (not a JRE).");
         }
 
         Path outputDir = cacheDirFor(routeFile);
         try {
             Files.createDirectories(outputDir);
         } catch (Exception exception) {
-            throw new RuntimeException(
-                "Failed to create route cache dir: " + outputDir,
-                exception
-            );
+            throw new RuntimeException("Failed to create route cache dir: " + outputDir, exception);
         }
 
         String sourceText;
         try {
             sourceText = Files.readString(routeFile, UTF_8);
         } catch (Exception exception) {
-            throw new RuntimeException(
-                "Failed to read route: " + routeFile,
-                exception
-            );
+            throw new RuntimeException("Failed to read route: " + routeFile, exception);
         }
 
         var diagnostics = new DiagnosticCollector<JavaFileObject>();
 
-        try (
-            var fileManager = compiler.getStandardFileManager(
-                diagnostics,
-                null,
-                UTF_8
-            )
-        ) {
-            fileManager.setLocation(
-                StandardLocation.CLASS_OUTPUT,
-                List.of(outputDir.toFile())
-            );
+        try (var fileManager = compiler.getStandardFileManager(diagnostics, null, UTF_8)) {
+            fileManager.setLocation(StandardLocation.CLASS_OUTPUT, List.of(outputDir.toFile()));
 
             String classpath = System.getProperty("java.class.path", "");
             var options = List.of("-classpath", classpath);
 
-            JavaFileObject routeSource = new SimpleJavaFileObject(
-                URI.create("winter-route:///Route.java"),
-                JavaFileObject.Kind.SOURCE
-            ) {
-                @Override
-                public CharSequence getCharContent(
-                    boolean ignoreEncodingErrors
-                ) {
-                    return sourceText;
-                }
-            };
+            JavaFileObject routeSource =
+                    new SimpleJavaFileObject(
+                            URI.create("winter-route:///Route.java"), JavaFileObject.Kind.SOURCE) {
+                        @Override
+                        public CharSequence getCharContent(boolean ignoreEncodingErrors) {
+                            return sourceText;
+                        }
+                    };
 
-            boolean ok = compiler
-                .getTask(
-                    null,
-                    fileManager,
-                    diagnostics,
-                    options,
-                    null,
-                    List.of(routeSource)
-                )
-                .call();
+            boolean ok =
+                    compiler.getTask(
+                                    null,
+                                    fileManager,
+                                    diagnostics,
+                                    options,
+                                    null,
+                                    List.of(routeSource))
+                            .call();
             if (!ok) {
                 throw new RuntimeException(
-                    "Failed to compile route: " +
-                        routeFile +
-                        "\n" +
-                        formatDiagnostics(diagnostics)
-                );
+                        "Failed to compile route: "
+                                + routeFile
+                                + "\n"
+                                + formatDiagnostics(diagnostics));
             }
         } catch (RuntimeException exception) {
             throw exception;
         } catch (Exception exception) {
-            throw new RuntimeException(
-                "Failed to compile route: " + routeFile,
-                exception
-            );
+            throw new RuntimeException("Failed to compile route: " + routeFile, exception);
         }
 
         try {
-            URLClassLoader loader = new URLClassLoader(
-                new URL[] { outputDir.toUri().toURL() },
-                getClass().getClassLoader()
-            );
+            URLClassLoader loader =
+                    new URLClassLoader(
+                            new URL[] {outputDir.toUri().toURL()}, getClass().getClassLoader());
             Class<?> routeClass = Class.forName("Route", true, loader);
             return new RouteHandle(routeClass, loader);
         } catch (Exception exception) {
-            throw new RuntimeException(
-                "Failed to load compiled route: " + routeFile,
-                exception
-            );
+            throw new RuntimeException("Failed to load compiled route: " + routeFile, exception);
         }
     }
 
@@ -158,26 +128,18 @@ public final class RouteCompiler {
         try {
             handle.close();
         } catch (Exception exception) {
-            System.err.println(
-                "Failed to close route classloader: " + exception.getMessage()
-            );
+            System.err.println("Failed to close route classloader: " + exception.getMessage());
         }
     }
 
     private static Path cacheDirFor(Path routeFile) {
         String hash = sha1(routeFile.toAbsolutePath().normalize().toString());
-        return Path.of(
-            System.getProperty("java.io.tmpdir"),
-            "winter-route-cache",
-            hash
-        );
+        return Path.of(System.getProperty("java.io.tmpdir"), "winter-route-cache", hash);
     }
 
     private static String sha1(String input) {
         try {
-            var digest = MessageDigest.getInstance("SHA-1").digest(
-                input.getBytes(UTF_8)
-            );
+            var digest = MessageDigest.getInstance("SHA-1").digest(input.getBytes(UTF_8));
             var out = new StringBuilder(digest.length * 2);
             for (byte b : digest) out.append(String.format("%02x", b));
             return out.toString();
@@ -186,19 +148,14 @@ public final class RouteCompiler {
         }
     }
 
-    private static String formatDiagnostics(
-        DiagnosticCollector<JavaFileObject> diagnostics
-    ) {
+    private static String formatDiagnostics(DiagnosticCollector<JavaFileObject> diagnostics) {
         var out = new StringBuilder();
-        for (Diagnostic<
-            ? extends JavaFileObject
-        > diagnostic : diagnostics.getDiagnostics()) {
-            out
-                .append("Line ")
-                .append(diagnostic.getLineNumber())
-                .append(": ")
-                .append(diagnostic.getMessage(null))
-                .append('\n');
+        for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
+            out.append("Line ")
+                    .append(diagnostic.getLineNumber())
+                    .append(": ")
+                    .append(diagnostic.getMessage(null))
+                    .append('\n');
         }
         return out.toString();
     }

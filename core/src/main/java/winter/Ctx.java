@@ -23,11 +23,10 @@ public final class Ctx {
     private byte[] cachedBody;
 
     Ctx(
-        HttpServerExchange exchange,
-        Map<String, String> params,
-        ObjectMapper objectMapper,
-        int maxBodyBytes
-    ) {
+            HttpServerExchange exchange,
+            Map<String, String> params,
+            ObjectMapper objectMapper,
+            int maxBodyBytes) {
         this.exchange = exchange;
         this.params = params;
         this.objectMapper = objectMapper;
@@ -64,9 +63,7 @@ public final class Ctx {
 
     public Map<String, List<String>> headers() {
         var out = new HashMap<String, List<String>>();
-        for (HttpString headerName : exchange
-            .getRequestHeaders()
-            .getHeaderNames()) {
+        for (HttpString headerName : exchange.getRequestHeaders().getHeaderNames()) {
             HeaderValues values = exchange.getRequestHeaders().get(headerName);
             if (values == null || values.isEmpty()) continue;
             out.put(headerName.toString(), new ArrayList<>(values));
@@ -116,10 +113,7 @@ public final class Ctx {
         try {
             return objectMapper.readValue(bodyBytes(), type);
         } catch (IOException exception) {
-            throw new HttpError(
-                400,
-                Map.of("error", "Bad Request", "message", "Invalid JSON")
-            );
+            throw new HttpError(400, Map.of("error", "Bad Request", "message", "Invalid JSON"));
         }
     }
 
@@ -136,10 +130,7 @@ public final class Ctx {
                 if (read == -1) break;
                 total += read;
                 if (total > maxBytes) {
-                    throw new HttpError(
-                        413,
-                        Map.of("error", "Payload Too Large")
-                    );
+                    throw new HttpError(413, Map.of("error", "Payload Too Large"));
                 }
                 out.write(buffer, 0, read);
             }

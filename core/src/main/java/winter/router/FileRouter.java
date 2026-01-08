@@ -39,7 +39,8 @@ public final class FileRouter {
                 if (last) {
                     Path index = safeResolve(current, "index.java");
                     if (index == null) return null;
-                    if (Files.isRegularFile(index)) return new RouteMatch(index, Map.copyOf(params));
+                    if (Files.isRegularFile(index))
+                        return new RouteMatch(index, Map.copyOf(params));
                     return null;
                 }
                 continue;
@@ -48,21 +49,24 @@ public final class FileRouter {
             if (last) {
                 Path exactFile = safeResolve(current, segment + ".java");
                 if (exactFile == null) return null;
-                if (Files.isRegularFile(exactFile)) return new RouteMatch(exactFile, Map.copyOf(params));
+                if (Files.isRegularFile(exactFile))
+                    return new RouteMatch(exactFile, Map.copyOf(params));
             }
 
             Path dynamicDir = findSingleDynamicDir(current);
             if (dynamicDir != null) {
                 String paramName = paramNameFromDir(dynamicDir.getFileName().toString());
                 if (params.containsKey(paramName)) {
-                    throw new IllegalStateException("Duplicate param name in route match: " + paramName);
+                    throw new IllegalStateException(
+                            "Duplicate param name in route match: " + paramName);
                 }
                 params.put(paramName, segment);
                 current = dynamicDir;
                 if (last) {
                     Path index = safeResolve(current, "index.java");
                     if (index == null) return null;
-                    if (Files.isRegularFile(index)) return new RouteMatch(index, Map.copyOf(params));
+                    if (Files.isRegularFile(index))
+                        return new RouteMatch(index, Map.copyOf(params));
                     return null;
                 }
                 continue;
@@ -73,7 +77,8 @@ public final class FileRouter {
                 if (dynamicFile != null) {
                     String paramName = paramNameFromFile(dynamicFile.getFileName().toString());
                     if (params.containsKey(paramName)) {
-                        throw new IllegalStateException("Duplicate param name in route match: " + paramName);
+                        throw new IllegalStateException(
+                                "Duplicate param name in route match: " + paramName);
                     }
                     params.put(paramName, segment);
                     return new RouteMatch(dynamicFile, Map.copyOf(params));
@@ -116,21 +121,31 @@ public final class FileRouter {
         List<Path> matches = new ArrayList<>();
 
         try (var stream = Files.list(directory)) {
-            stream
-                    .filter(Files::isDirectory)
+            stream.filter(Files::isDirectory)
                     .filter(p -> isDynamicDirName(p.getFileName().toString()))
                     .forEach(matches::add);
         } catch (java.io.IOException exception) {
-            System.err.println("Failed to list routes directory: " + directory + " (" + exception.getMessage() + ")");
+            System.err.println(
+                    "Failed to list routes directory: "
+                            + directory
+                            + " ("
+                            + exception.getMessage()
+                            + ")");
             return null;
         } catch (SecurityException exception) {
-            System.err.println("Permission denied listing routes directory: " + directory + " (" + exception.getMessage() + ")");
+            System.err.println(
+                    "Permission denied listing routes directory: "
+                            + directory
+                            + " ("
+                            + exception.getMessage()
+                            + ")");
             return null;
         }
 
         if (matches.isEmpty()) return null;
         if (matches.size() > 1) {
-            throw new IllegalStateException("Ambiguous dynamic directories under " + directory + ": " + matches);
+            throw new IllegalStateException(
+                    "Ambiguous dynamic directories under " + directory + ": " + matches);
         }
         return matches.getFirst();
     }
@@ -139,21 +154,31 @@ public final class FileRouter {
         List<Path> matches = new ArrayList<>();
 
         try (var stream = Files.list(directory)) {
-            stream
-                    .filter(Files::isRegularFile)
+            stream.filter(Files::isRegularFile)
                     .filter(p -> isDynamicFileName(p.getFileName().toString()))
                     .forEach(matches::add);
         } catch (java.io.IOException exception) {
-            System.err.println("Failed to list routes directory: " + directory + " (" + exception.getMessage() + ")");
+            System.err.println(
+                    "Failed to list routes directory: "
+                            + directory
+                            + " ("
+                            + exception.getMessage()
+                            + ")");
             return null;
         } catch (SecurityException exception) {
-            System.err.println("Permission denied listing routes directory: " + directory + " (" + exception.getMessage() + ")");
+            System.err.println(
+                    "Permission denied listing routes directory: "
+                            + directory
+                            + " ("
+                            + exception.getMessage()
+                            + ")");
             return null;
         }
 
         if (matches.isEmpty()) return null;
         if (matches.size() > 1) {
-            throw new IllegalStateException("Ambiguous dynamic files under " + directory + ": " + matches);
+            throw new IllegalStateException(
+                    "Ambiguous dynamic files under " + directory + ": " + matches);
         }
         return matches.getFirst();
     }
@@ -163,7 +188,9 @@ public final class FileRouter {
     }
 
     private static boolean isDynamicFileName(String name) {
-        return name.startsWith("[") && name.endsWith("].java") && name.length() > "[].java".length();
+        return name.startsWith("[")
+                && name.endsWith("].java")
+                && name.length() > "[].java".length();
     }
 
     private static String paramNameFromDir(String dirName) {

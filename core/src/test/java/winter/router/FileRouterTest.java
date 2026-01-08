@@ -34,10 +34,7 @@ final class FileRouterTest {
         RouteMatch match = router.match("/users");
 
         assertNotNull(match);
-        assertEquals(
-            routes.resolve("users/index.java").normalize(),
-            match.file()
-        );
+        assertEquals(routes.resolve("users/index.java").normalize(), match.file());
         assertEquals(Map.of(), match.params());
     }
 
@@ -65,16 +62,12 @@ final class FileRouterTest {
         RouteMatch match = router.match("/users/123/posts");
 
         assertNotNull(match);
-        assertEquals(
-            routes.resolve("users/[id]/posts/index.java").normalize(),
-            match.file()
-        );
+        assertEquals(routes.resolve("users/[id]/posts/index.java").normalize(), match.file());
         assertEquals(Map.of("id", "123"), match.params());
     }
 
     @Test
-    void nestedDynamicDirThenDynamicFileResolves(@TempDir Path tempDir)
-        throws Exception {
+    void nestedDynamicDirThenDynamicFileResolves(@TempDir Path tempDir) throws Exception {
         Path routes = tempDir.resolve("routes");
         Files.createDirectories(routes.resolve("[category]"));
         Files.writeString(routes.resolve("[category]/[id].java"), "");
@@ -83,10 +76,7 @@ final class FileRouterTest {
         RouteMatch match = router.match("/books/123");
 
         assertNotNull(match);
-        assertEquals(
-            routes.resolve("[category]/[id].java").normalize(),
-            match.file()
-        );
+        assertEquals(routes.resolve("[category]/[id].java").normalize(), match.file());
         assertEquals(Map.of("category", "books", "id", "123"), match.params());
     }
 
@@ -102,10 +92,7 @@ final class FileRouterTest {
         RouteMatch match = router.match("/users");
 
         assertNotNull(match);
-        assertEquals(
-            routes.resolve("users/index.java").normalize(),
-            match.file()
-        );
+        assertEquals(routes.resolve("users/index.java").normalize(), match.file());
         assertEquals(Map.of(), match.params());
     }
 
@@ -120,16 +107,12 @@ final class FileRouterTest {
         RouteMatch match = router.match("/foo");
 
         assertNotNull(match);
-        assertEquals(
-            routes.resolve("[x]/index.java").normalize(),
-            match.file()
-        );
+        assertEquals(routes.resolve("[x]/index.java").normalize(), match.file());
         assertEquals(Map.of("x", "foo"), match.params());
     }
 
     @Test
-    void ambiguityMultipleDynamicDirsThrows(@TempDir Path tempDir)
-        throws Exception {
+    void ambiguityMultipleDynamicDirsThrows(@TempDir Path tempDir) throws Exception {
         Path routes = tempDir.resolve("routes");
         Files.createDirectories(routes.resolve("[id]"));
         Files.createDirectories(routes.resolve("[slug]"));
@@ -137,23 +120,18 @@ final class FileRouterTest {
         Files.writeString(routes.resolve("[slug]/index.java"), "");
 
         var router = new FileRouter(routes);
-        assertThrows(IllegalStateException.class, () ->
-            router.match("/anything")
-        );
+        assertThrows(IllegalStateException.class, () -> router.match("/anything"));
     }
 
     @Test
-    void ambiguityMultipleDynamicFilesThrows(@TempDir Path tempDir)
-        throws Exception {
+    void ambiguityMultipleDynamicFilesThrows(@TempDir Path tempDir) throws Exception {
         Path routes = tempDir.resolve("routes");
         Files.createDirectories(routes);
         Files.writeString(routes.resolve("[id].java"), "");
         Files.writeString(routes.resolve("[slug].java"), "");
 
         var router = new FileRouter(routes);
-        assertThrows(IllegalStateException.class, () ->
-            router.match("/anything")
-        );
+        assertThrows(IllegalStateException.class, () -> router.match("/anything"));
     }
 
     @Test
@@ -179,8 +157,7 @@ final class FileRouterTest {
     }
 
     @Test
-    void normalizesTrailingSlashAndQueryString(@TempDir Path tempDir)
-        throws Exception {
+    void normalizesTrailingSlashAndQueryString(@TempDir Path tempDir) throws Exception {
         Path routes = tempDir.resolve("routes");
         Files.createDirectories(routes.resolve("users"));
         Files.writeString(routes.resolve("users/index.java"), "");
@@ -192,8 +169,7 @@ final class FileRouterTest {
     }
 
     @Test
-    void unsafeBackslashSegmentReturnsNull(@TempDir Path tempDir)
-        throws Exception {
+    void unsafeBackslashSegmentReturnsNull(@TempDir Path tempDir) throws Exception {
         Path routes = tempDir.resolve("routes");
         Files.createDirectories(routes);
         Files.writeString(routes.resolve("index.java"), "");
@@ -203,8 +179,7 @@ final class FileRouterTest {
     }
 
     @Test
-    void staticDirWithoutIndexDoesNotMatch(@TempDir Path tempDir)
-        throws Exception {
+    void staticDirWithoutIndexDoesNotMatch(@TempDir Path tempDir) throws Exception {
         Path routes = tempDir.resolve("routes");
         Files.createDirectories(routes.resolve("users"));
 
@@ -233,8 +208,7 @@ final class FileRouterTest {
     }
 
     @Test
-    void dynamicDirRequiresIndexForLeaf(@TempDir Path tempDir)
-        throws Exception {
+    void dynamicDirRequiresIndexForLeaf(@TempDir Path tempDir) throws Exception {
         Path routes = tempDir.resolve("routes");
         Files.createDirectories(routes.resolve("[id]"));
         // no [id]/index.java
